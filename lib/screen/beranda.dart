@@ -24,6 +24,7 @@ class Beranda extends StatefulWidget {
   const Beranda({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _BerandaState createState() => _BerandaState();
 }
 
