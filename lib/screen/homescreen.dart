@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:satoe_connection/screen/login/sign_in.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,7 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.all(40.0),
                     child: Column(
                       children: [
-                        Expanded( // Wrap the Image.asset with Expanded
+                        Expanded(
+                          // Wrap the Image.asset with Expanded
                           child: Image.asset(
                             contents[i].image,
                             // Remove fixed height here, let it be flexible
@@ -116,11 +118,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? Padding(
                           padding: const EdgeInsets.all(30),
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignIn(),
+                                ),
+                              );
+                            },
                             // ignore: sort_child_properties_last
                             child: const Text("START"),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
+                              backgroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
@@ -166,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 // ignore: sort_child_properties_last
                                 child: const Text("NEXT"),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black,
+                                  backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(50),
                                   ),
@@ -192,7 +201,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
 
 class SizeConfig {
   static MediaQueryData? _mediaQueryData;
