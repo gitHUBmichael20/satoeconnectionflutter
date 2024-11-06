@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:satoe_connection/screen/login/sign_in.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,26 +19,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int _currentPage = 0;
-  List colors = const [
+  List<Color> colors = const [
     Color(0xffDAD3C8),
     Color(0xffFFE5DE),
     Color(0xffDCF6E6),
   ];
 
-  AnimatedContainer _buildDots({
-    int? index,
-  }) {
+  AnimatedContainer _buildDots({required int index}) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(
-          Radius.circular(50),
-        ),
-        color: Color(0xFF000000),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(50),
+        color: _currentPage == index ? Colors.green[400] : Colors.grey[400],
       ),
       margin: const EdgeInsets.only(right: 5),
       height: 10,
-      curve: Curves.easeIn,
       width: _currentPage == index ? 20 : 10,
     );
   }
@@ -66,34 +62,30 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       children: [
                         Expanded(
-                          // Wrap the Image.asset with Expanded
-                          child: Image.asset(
-                            contents[i].image,
-                            // Remove fixed height here, let it be flexible
-                          ),
+                          child: contents[i].image,
                         ),
                         SizedBox(
-                          height: (height >= 840) ? 60 : 30,
+                          height: height >= 840 ? 60 : 30,
                         ),
                         Text(
                           contents[i].title,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontFamily: "Mulish",
+                            fontFamily: "Inter",
                             fontWeight: FontWeight.w600,
-                            fontSize: (width <= 550) ? 30 : 35,
+                            fontSize: width <= 550 ? 30 : 35,
                           ),
                         ),
                         const SizedBox(height: 15),
                         Text(
                           contents[i].desc,
                           style: TextStyle(
-                            fontFamily: "Mulish",
+                            fontFamily: "Inter",
                             fontWeight: FontWeight.w300,
-                            fontSize: (width <= 550) ? 17 : 25,
+                            fontSize: width <= 550 ? 17 : 25,
                           ),
                           textAlign: TextAlign.center,
-                        )
+                        ),
                       ],
                     ),
                   );
@@ -109,9 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       contents.length,
-                      (int index) => _buildDots(
-                        index: index,
-                      ),
+                      (index) => _buildDots(index: index),
                     ),
                   ),
                   _currentPage + 1 == contents.length
@@ -126,20 +116,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             },
-                            // ignore: sort_child_properties_last
-                            child: const Text("START"),
+                            child: const Text(
+                              "START",
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
-                              padding: (width <= 550)
-                                  ? const EdgeInsets.symmetric(
-                                      horizontal: 100, vertical: 20)
-                                  : EdgeInsets.symmetric(
-                                      horizontal: width * 0.2, vertical: 25),
-                              textStyle:
-                                  TextStyle(fontSize: (width <= 550) ? 13 : 17),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: width <= 550 ? 100 : width * 0.2,
+                                vertical: width <= 550 ? 20 : 25,
+                              ),
+                              textStyle: TextStyle(
+                                fontSize: width <= 550 ? 13 : 17,
+                              ),
                             ),
                           ),
                         )
@@ -152,17 +149,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onPressed: () {
                                   _controller.jumpToPage(2);
                                 },
-                                // ignore: sort_child_properties_last
                                 child: const Text(
                                   "SKIP",
                                   style: TextStyle(color: Colors.black),
-                                ),
-                                style: TextButton.styleFrom(
-                                  elevation: 0,
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: (width <= 550) ? 13 : 17,
-                                  ),
                                 ),
                               ),
                               ElevatedButton(
@@ -172,21 +161,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                     curve: Curves.easeIn,
                                   );
                                 },
-                                // ignore: sort_child_properties_last
                                 child: const Text("NEXT"),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(50),
                                   ),
-                                  elevation: 0,
-                                  padding: (width <= 550)
-                                      ? const EdgeInsets.symmetric(
-                                          horizontal: 30, vertical: 20)
-                                      : const EdgeInsets.symmetric(
-                                          horizontal: 30, vertical: 25),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 30,
+                                    vertical: 20,
+                                  ),
                                   textStyle: TextStyle(
-                                      fontSize: (width <= 550) ? 13 : 17),
+                                    fontSize: width <= 550 ? 13 : 17,
+                                  ),
                                 ),
                               ),
                             ],
@@ -220,7 +207,7 @@ class SizeConfig {
 
 class OnboardingContents {
   final String title;
-  final String image;
+  final Widget image;
   final String desc;
 
   OnboardingContents({
@@ -232,19 +219,19 @@ class OnboardingContents {
 
 List<OnboardingContents> contents = [
   OnboardingContents(
-    title: "Track Your work and get the result",
-    image: "assets/logo.png",
+    title: "Connect with new people in SMKN 1 KOTA BEKASI",
+    image: Lottie.asset('assets/animation/welcome.json'),
     desc: "Remember to keep track of your professional accomplishments.",
   ),
   OnboardingContents(
-    title: "Stay organized with team",
-    image: "assets/logo.png",
+    title: "More People More Relationships",
+    image: Lottie.asset('assets/animation/connect.json'),
     desc:
-        "But understanding the contributions our colleagues make to our teams and companies.",
+        "Understanding the contributions our colleagues make to our teams and companies.",
   ),
   OnboardingContents(
-    title: "Get notified when work happens",
-    image: "assets/logo.png",
+    title: "Get notifications for important people",
+    image: Lottie.asset('assets/animation/connect.json'),
     desc:
         "Take control of notifications, collaborate live or on your own time.",
   ),
