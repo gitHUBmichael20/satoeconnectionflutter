@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
+// ignore: unused_element
 const Color _kAppColor = Color(0xFFFDDE6F);
 const double _kSize = 100;
 
@@ -52,7 +53,7 @@ class _SplashscreenState extends State<Splashscreen> {
                 secondRingColor: Colors.black,
                 thirdRingColor: Colors.purple,
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -73,10 +74,9 @@ final List<AppBody> pages = [
   AppBody(
     'discreteCircle',
     LoadingAnimationWidget.discreteCircle(
-      color: Colors.white,
-      size: _kSize,
-      secondRingColor: Colors.black,
-      thirdRingColor: Colors.purple,
-    ),
+        color: Colors.white,
+        size: _kSize,
+        secondRingColor: Colors.black,
+        thirdRingColor: Colors.purple),
   ),
 ];

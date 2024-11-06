@@ -1,177 +1,243 @@
 import 'package:flutter/material.dart';
-import 'package:satoe_connection/screen/login/sign_in.dart';
-import 'package:satoe_connection/screen/login/sign_up.dart';
 
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-class Homescreen extends StatelessWidget {
-  const Homescreen({super.key});
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late PageController _controller;
+
+  @override
+  void initState() {
+    _controller = PageController();
+    super.initState();
+  }
+
+  int _currentPage = 0;
+  List colors = const [
+    Color(0xffDAD3C8),
+    Color(0xffFFE5DE),
+    Color(0xffDCF6E6),
+  ];
+
+  AnimatedContainer _buildDots({
+    int? index,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(
+          Radius.circular(50),
+        ),
+        color: Color(0xFF000000),
+      ),
+      margin: const EdgeInsets.only(right: 5),
+      height: 10,
+      curve: Curves.easeIn,
+      width: _currentPage == index ? 20 : 10,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
+    double width = SizeConfig.screenW!;
+    double height = SizeConfig.screenH!;
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color.fromRGBO(42, 30, 92, 1),
-              Color(0xFF342873),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2A1E5C),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        offset: const Offset(4, 4),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.1),
-                        offset: const Offset(-4, -4),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: Image.asset(
-                    'assets/logo.png',
-                    height: 60,
-                    width: 60,
-                    color: const Color(0xFF1D7874),
-                  ),
-                ),
-                const SizedBox(height: 60),
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2A1E5C),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        offset: const Offset(8, 8),
-                        blurRadius: 16,
-                        spreadRadius: 1,
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.1),
-                        offset: const Offset(-8, -8),
-                        blurRadius: 16,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Connect\nfriends\neasily &\nquickly',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 40,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          height: 1.2,
+      backgroundColor: colors[_currentPage],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              flex: 3,
+              child: PageView.builder(
+                physics: const BouncingScrollPhysics(),
+                controller: _controller,
+                onPageChanged: (value) => setState(() => _currentPage = value),
+                itemCount: contents.length,
+                itemBuilder: (context, i) {
+                  return Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: Column(
+                      children: [
+                        Expanded( // Wrap the Image.asset with Expanded
+                          child: Image.asset(
+                            contents[i].image,
+                            // Remove fixed height here, let it be flexible
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Our chat app is the perfect way to stay\nconnected with friends and family.',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          height: 1.5,
+                        SizedBox(
+                          height: (height >= 840) ? 60 : 30,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        offset: const Offset(4, 4),
-                        blurRadius: 8,
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.1),
-                        offset: const Offset(-4, -4),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SignUp()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      minimumSize: const Size(double.infinity, 0),
-                    ),
-                    child: const Text(
-                      'Sign up',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignIn(),
+                        Text(
+                          contents[i].title,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: "Mulish",
+                            fontWeight: FontWeight.w600,
+                            fontSize: (width <= 550) ? 30 : 35,
+                          ),
                         ),
-                      );
-                    },
-                    child: const Text(
-                      'Already have an account? Log in',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                      ),
+                        const SizedBox(height: 15),
+                        Text(
+                          contents[i].desc,
+                          style: TextStyle(
+                            fontFamily: "Mulish",
+                            fontWeight: FontWeight.w300,
+                            fontSize: (width <= 550) ? 17 : 25,
+                          ),
+                          textAlign: TextAlign.center,
+                        )
+                      ],
                     ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
-          ),
+            Expanded(
+              flex: 1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      contents.length,
+                      (int index) => _buildDots(
+                        index: index,
+                      ),
+                    ),
+                  ),
+                  _currentPage + 1 == contents.length
+                      ? Padding(
+                          padding: const EdgeInsets.all(30),
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            // ignore: sort_child_properties_last
+                            child: const Text("START"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              padding: (width <= 550)
+                                  ? const EdgeInsets.symmetric(
+                                      horizontal: 100, vertical: 20)
+                                  : EdgeInsets.symmetric(
+                                      horizontal: width * 0.2, vertical: 25),
+                              textStyle:
+                                  TextStyle(fontSize: (width <= 550) ? 13 : 17),
+                            ),
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(30),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  _controller.jumpToPage(2);
+                                },
+                                // ignore: sort_child_properties_last
+                                child: const Text(
+                                  "SKIP",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                style: TextButton.styleFrom(
+                                  elevation: 0,
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: (width <= 550) ? 13 : 17,
+                                  ),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _controller.nextPage(
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeIn,
+                                  );
+                                },
+                                // ignore: sort_child_properties_last
+                                child: const Text("NEXT"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  elevation: 0,
+                                  padding: (width <= 550)
+                                      ? const EdgeInsets.symmetric(
+                                          horizontal: 30, vertical: 20)
+                                      : const EdgeInsets.symmetric(
+                                          horizontal: 30, vertical: 25),
+                                  textStyle: TextStyle(
+                                      fontSize: (width <= 550) ? 13 : 17),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+
+class SizeConfig {
+  static MediaQueryData? _mediaQueryData;
+  static double? screenW;
+  static double? screenH;
+  static double? blockH;
+  static double? blockV;
+
+  void init(BuildContext context) {
+    _mediaQueryData = MediaQuery.of(context);
+    screenW = _mediaQueryData!.size.width;
+    screenH = _mediaQueryData!.size.height;
+    blockH = screenW! / 100;
+    blockV = screenH! / 100;
+  }
+}
+
+class OnboardingContents {
+  final String title;
+  final String image;
+  final String desc;
+
+  OnboardingContents({
+    required this.title,
+    required this.image,
+    required this.desc,
+  });
+}
+
+List<OnboardingContents> contents = [
+  OnboardingContents(
+    title: "Track Your work and get the result",
+    image: "assets/logo.png",
+    desc: "Remember to keep track of your professional accomplishments.",
+  ),
+  OnboardingContents(
+    title: "Stay organized with team",
+    image: "assets/logo.png",
+    desc:
+        "But understanding the contributions our colleagues make to our teams and companies.",
+  ),
+  OnboardingContents(
+    title: "Get notified when work happens",
+    image: "assets/logo.png",
+    desc:
+        "Take control of notifications, collaborate live or on your own time.",
+  ),
+];
