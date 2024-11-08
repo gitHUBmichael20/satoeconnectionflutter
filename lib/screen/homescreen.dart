@@ -116,15 +116,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             },
-                            child: const Text(
-                              "START",
-                              style: TextStyle(
-                                fontFamily: 'Roboto',
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                              ),
-                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
@@ -136,6 +127,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               textStyle: TextStyle(
                                 fontSize: width <= 550 ? 13 : 17,
+                              ),
+                            ),
+                            child: const Text(
+                              "START",
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
                               ),
                             ),
                           ),
@@ -161,7 +161,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                     curve: Curves.easeIn,
                                   );
                                 },
-                                child: const Text("NEXT"),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
@@ -175,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     fontSize: width <= 550 ? 13 : 17,
                                   ),
                                 ),
+                                child: const Text("NEXT"),
                               ),
                             ],
                           ),
@@ -231,7 +231,7 @@ List<OnboardingContents> contents = [
   ),
   OnboardingContents(
     title: "Get notifications for important people",
-    image: Lottie.asset('assets/animation/connect.json'),
+    image: Lottie.asset('assets/animation/notification.json'),
     desc:
         "Take control of notifications, collaborate live or on your own time.",
   ),

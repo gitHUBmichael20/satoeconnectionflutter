@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:satoe_connection/screen/beranda.dart';
 import 'package:satoe_connection/screen/wrapper.dart';
-// import 'package:satoe_connection/screen/login/sign_in.dart';
+import 'package:satoe_connection/screen/login/sign_in.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -68,7 +67,7 @@ class _SignUpState extends State<SignUp> {
             
             // Login Text
             const Text(
-              'Sign up to Chatbox',
+              'Sign up to SatoeConnection',
               style: TextStyle(
                 fontSize: 24,
                 fontFamily: 'Poppins',
@@ -204,9 +203,13 @@ class _SignUpState extends State<SignUp> {
             TextButton(
               onPressed: () {
                 // Handle forgot password
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignIn()),
+                );
               },
               child: const Text(
-                'Forgot password?',
+                'Already have an account? Sign in',
                 style: TextStyle(
                   color: Color(0xFF1D7874),
                   fontFamily: 'Poppins',

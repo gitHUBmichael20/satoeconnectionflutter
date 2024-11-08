@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:satoe_connection/screen/wrapper.dart';
+import 'package:satoe_connection/screen/login/sign_up.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -67,7 +68,7 @@ class _SignInState extends State<SignIn> {
             
             // Login Text
             const Text(
-              'Log in to Chatbox',
+              'Log in to SatoeConnection',
               style: TextStyle(
                 fontSize: 24,
                 fontFamily: 'Poppins',
@@ -202,10 +203,14 @@ class _SignInState extends State<SignIn> {
             // Forgot Password
             TextButton(
               onPressed: () {
-                // Handle forgot password
+                //open the register page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignUp()),
+                );
               },
               child: const Text(
-                'Forgot password?',
+                'Doesnt have an account Register now?',
                 style: TextStyle(
                   color: Color(0xFF1D7874),
                   fontFamily: 'Poppins',

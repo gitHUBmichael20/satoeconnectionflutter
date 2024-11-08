@@ -67,6 +67,7 @@ flutter:
   - assets/logo.png
   - assets/animation/welcome.json
   - assets/animation/connect.json
+  - assets/animation/notification.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
