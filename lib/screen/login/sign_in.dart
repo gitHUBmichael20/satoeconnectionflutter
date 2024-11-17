@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:satoe_connection/screen/wrapper.dart';
 import 'package:satoe_connection/screen/login/sign_up.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -37,39 +38,42 @@ class _SignInState extends State<SignIn> {
     });
   }
 
-  Future<void> _login() async {
-    final response = await http.post(
-      Uri.parse('http://localhost:8000/api/login'), // ganti dengan URL API Anda
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': _emailController.text,
-        'password': _passwordController.text,
-      }),
-    );
+Future<void> _login() async {
+  final response = await http.post(
+    Uri.parse('http://localhost:8000/api/login'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'email': _emailController.text,
+      'password': _passwordController.text,
+    }),
+  );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final token = data['token'];
-      
-      // Simpan token atau lanjutkan ke halaman berikutnya
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login successful!')),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Wrapper()),
-      );
-    } else if (response.statusCode == 401) {
-      final errorData = json.decode(response.body);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorData['message'])),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Please try again later.')),
-      );
-    }
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    final token = data['token'];
+
+    // Simpan token ke SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Login successful!')),
+    );
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const Wrapper()),
+    );
+  } else if (response.statusCode == 401) {
+    final errorData = json.decode(response.body);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(errorData['message'])),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Login failed. Please try again later.')),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
