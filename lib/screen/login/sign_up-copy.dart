@@ -1,17 +1,15 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:satoe_connection/screen/wrapper.dart';
-import 'package:satoe_connection/screen/login/sign_up.dart';
+import 'package:satoe_connection/screen/login/sign_in.dart';
 
-class SignIn extends StatefulWidget {
-  const SignIn({super.key});
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
 
   @override
-  State<SignIn> createState() => _SignInState();
+  State<SignUp> createState() => _SignUpState();
 }
 
-class _SignInState extends State<SignIn> {
+class _SignUpState extends State<SignUp> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isFormValid = false;
@@ -19,6 +17,7 @@ class _SignInState extends State<SignIn> {
   @override
   void initState() {
     super.initState();
+    // Add listeners to check form validity
     _emailController.addListener(_checkFormValidity);
     _passwordController.addListener(_checkFormValidity);
   }
@@ -35,40 +34,6 @@ class _SignInState extends State<SignIn> {
       _isFormValid = _emailController.text.isNotEmpty && 
                      _passwordController.text.isNotEmpty;
     });
-  }
-
-  Future<void> _login() async {
-    final response = await http.post(
-      Uri.parse('http://localhost:8000/api/login'), // ganti dengan URL API Anda
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': _emailController.text,
-        'password': _passwordController.text,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final token = data['token'];
-      
-      // Simpan token atau lanjutkan ke halaman berikutnya
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login successful!')),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Wrapper()),
-      );
-    } else if (response.statusCode == 401) {
-      final errorData = json.decode(response.body);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorData['message'])),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Please try again later.')),
-      );
-    }
   }
 
   @override
@@ -91,15 +56,18 @@ class _SignInState extends State<SignIn> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+
             Image.asset(
               'assets/logo.png',
               height: 60,
               width: 60,
-              color: const Color(0xFF1D7874),
+              color: const Color(0xFF1D7874), // Teal/green color similar to image
             ),
             const SizedBox(height: 12),
+            
+            // Login Text
             const Text(
-              'Log in to SatoeConnection',
+              'Sign up to SatoeConnection',
               style: TextStyle(
                 fontSize: 24,
                 fontFamily: 'Poppins',
@@ -108,8 +76,10 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             const SizedBox(height: 8),
+            
+            // Welcome Text
             const Text(
-              'Welcome back! Sign in using your social\naccount or email to continue us',
+              'Welcome back! Sign up using your \naccount or email to continue us',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -119,6 +89,8 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             const SizedBox(height: 32),
+            
+            // Email Field
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -155,6 +127,8 @@ class _SignInState extends State<SignIn> {
               ],
             ),
             const SizedBox(height: 24),
+            
+            // Password Field
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -192,10 +166,18 @@ class _SignInState extends State<SignIn> {
               ],
             ),
             const SizedBox(height: 32),
+            
+            // Login Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isFormValid ? _login : null,
+                onPressed: _isFormValid ? () {
+                  // Handle login
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Wrapper()),
+                  );
+                } : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D7874),
                   disabledBackgroundColor: Colors.grey[200],
@@ -216,15 +198,18 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             const SizedBox(height: 16),
+            
+            // Forgot Password
             TextButton(
               onPressed: () {
+                // Handle forgot password
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SignUp()),
+                  MaterialPageRoute(builder: (context) => const SignIn()),
                 );
               },
               child: const Text(
-                'Doesnt have an account Register now?',
+                'Already have an account? Sign in',
                 style: TextStyle(
                   color: Color(0xFF1D7874),
                   fontFamily: 'Poppins',
