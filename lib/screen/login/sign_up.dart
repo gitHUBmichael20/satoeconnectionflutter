@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:satoe_connection/screen/wrapper.dart';
 import 'package:satoe_connection/screen/login/sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -17,7 +19,6 @@ class _SignUpState extends State<SignUp> {
   @override
   void initState() {
     super.initState();
-    // Add listeners to check form validity
     _emailController.addListener(_checkFormValidity);
     _passwordController.addListener(_checkFormValidity);
   }
@@ -34,6 +35,40 @@ class _SignUpState extends State<SignUp> {
       _isFormValid = _emailController.text.isNotEmpty && 
                      _passwordController.text.isNotEmpty;
     });
+  }
+
+  Future<void> registerUser() async {
+    const url = 'http://localhost:8000/api/register'; // Ganti dengan URL API-mu
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "email": _emailController.text,
+          "password": _passwordController.text,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration successful!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SignIn()),
+        );
+      } else {
+        final errorData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed: ${errorData['error'] ?? 'Unknown error'}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Username sudah digunakan!')),
+      );
+    }
   }
 
   @override
@@ -56,16 +91,13 @@ class _SignUpState extends State<SignUp> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
             Image.asset(
               'assets/logo.png',
               height: 60,
               width: 60,
-              color: const Color(0xFF1D7874), // Teal/green color similar to image
+              color: const Color(0xFF1D7874),
             ),
             const SizedBox(height: 12),
-            
-            // Login Text
             const Text(
               'Sign up to SatoeConnection',
               style: TextStyle(
@@ -76,8 +108,6 @@ class _SignUpState extends State<SignUp> {
               ),
             ),
             const SizedBox(height: 8),
-            
-            // Welcome Text
             const Text(
               'Welcome back! Sign up using your \naccount or email to continue us',
               textAlign: TextAlign.center,
@@ -89,8 +119,6 @@ class _SignUpState extends State<SignUp> {
               ),
             ),
             const SizedBox(height: 32),
-            
-            // Email Field
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -127,8 +155,6 @@ class _SignUpState extends State<SignUp> {
               ],
             ),
             const SizedBox(height: 24),
-            
-            // Password Field
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -166,18 +192,10 @@ class _SignUpState extends State<SignUp> {
               ],
             ),
             const SizedBox(height: 32),
-            
-            // Login Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isFormValid ? () {
-                  // Handle login
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Wrapper()),
-                  );
-                } : null,
+                onPressed: _isFormValid ? registerUser : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D7874),
                   disabledBackgroundColor: Colors.grey[200],
@@ -187,7 +205,7 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
                 child: Text(
-                  'Log in',
+                  'Sign Up',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 16,
@@ -198,11 +216,8 @@ class _SignUpState extends State<SignUp> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Forgot Password
             TextButton(
               onPressed: () {
-                // Handle forgot password
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SignIn()),
