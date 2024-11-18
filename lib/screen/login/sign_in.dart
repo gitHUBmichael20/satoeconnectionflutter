@@ -33,47 +33,125 @@ class _SignInState extends State<SignIn> {
 
   void _checkFormValidity() {
     setState(() {
-      _isFormValid = _emailController.text.isNotEmpty && 
-                     _passwordController.text.isNotEmpty;
+      _isFormValid = _emailController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty;
     });
   }
 
-Future<void> _login() async {
-  final response = await http.post(
-    Uri.parse('http://localhost:8000/api/login'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'email': _emailController.text,
-      'password': _passwordController.text,
-    }),
-  );
+  Future<void> _login() async {
+    final response = await http.post(
+      Uri.parse('http://localhost:8000/api/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      }),
+    );
 
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    final token = data['token'];
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final token = data['token'];
 
-    // Simpan token ke SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
+      // Save token to SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Login successful!')),
-    );
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const Wrapper()),
-    );
-  } else if (response.statusCode == 401) {
-    final errorData = json.decode(response.body);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(errorData['message'])),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login failed. Please try again later.')),
-    );
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Text(
+                'Login successful!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Color(0xFF4CAF50),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+          duration: Duration(seconds: 3),
+          elevation: 4,
+        ),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Wrapper()),
+      );
+    } else if (response.statusCode == 401) {
+      if (!mounted) return;
+      
+      final errorData = json.decode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  errorData['message'],
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Color(0xFFE57373),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+          duration: Duration(seconds: 4),
+          elevation: 4,
+        ),
+      );
+    } else {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Text(
+                'Login failed. Please try again later.',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Color(0xFF757575),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+          duration: Duration(seconds: 4),
+          elevation: 4,
+        ),
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {

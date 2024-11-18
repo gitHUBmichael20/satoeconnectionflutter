@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:satoe_connection/screen/homescreen.dart';
 import 'package:satoe_connection/screen/splashscreen.dart';
-import 'package:satoe_connection/screen/chat.dart';
 void main() {
   runApp(const MyApp());
 }

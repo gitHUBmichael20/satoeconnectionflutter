@@ -52,7 +52,7 @@ class _SignUpState extends State<SignUp> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration successful!')),
+          const SnackBar(content: Text('Registration successful!')),
         );
         Navigator.pushReplacement(
           context,
@@ -66,7 +66,7 @@ class _SignUpState extends State<SignUp> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Username sudah digunakan!')),
+        const SnackBar(content: Text('Username sudah digunakan!')),
       );
     }
   }
@@ -135,7 +135,7 @@ class _SignUpState extends State<SignUp> {
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    hintText: 'Enter your email',
+                    hintText: 'Enter your eamail',
                     hintStyle: const TextStyle(
                       color: Colors.black26,
                       fontFamily: 'Poppins',
