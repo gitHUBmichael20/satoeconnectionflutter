@@ -117,14 +117,16 @@ class SettingsPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 15),
                         ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 0, vertical: 5),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.person_outline, color: Colors.black87, size: 24),
+                            child: const Icon(Icons.person_outline,
+                                color: Colors.black87, size: 24),
                           ),
                           title: const Text(
                             'Personal Information',
@@ -134,17 +136,20 @@ class SettingsPage extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                          trailing: const Icon(Icons.chevron_right,
+                              color: Colors.grey),
                         ),
                         ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 0, vertical: 5),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.notifications_outlined, color: Colors.black87, size: 24),
+                            child: const Icon(Icons.notifications_outlined,
+                                color: Colors.black87, size: 24),
                           ),
                           title: const Text(
                             'Notifications',
@@ -154,28 +159,45 @@ class SettingsPage extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          subtitle: const Text('Customize your notification preferences'),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                          subtitle: const Text(
+                              'Customize your notification preferences'),
+                          trailing: const Icon(Icons.chevron_right,
+                              color: Colors.grey),
                         ),
                         ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 0, vertical: 5),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.lock_outline, color: Colors.black87, size: 24),
+                            child: const Icon(Icons.dark_mode_outlined,
+                                color: Colors.black87, size: 24),
                           ),
                           title: const Text(
-                            'Privacy',
+                            'Dark Mode',
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                          trailing: Switch.adaptive(
+                            value: false, // Nilai default false (light mode)
+                            activeColor:
+                                Colors.blue, // Warna ketika switch aktif
+                            activeTrackColor: Colors.blue
+                                .withOpacity(0.5), // Warna track ketika aktif
+                            inactiveThumbColor:
+                                Colors.grey[400], // Warna thumb ketika nonaktif
+                            inactiveTrackColor:
+                                Colors.grey[300], // Warna track ketika nonaktif
+                            onChanged: (bool value) {
+                              // Function akan diimplementasikan nanti
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -199,14 +221,16 @@ class SettingsPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 15),
                         ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 0, vertical: 5),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.language, color: Colors.black87, size: 24),
+                            child: const Icon(Icons.language,
+                                color: Colors.black87, size: 24),
                           ),
                           title: const Text(
                             'Language',
@@ -217,17 +241,20 @@ class SettingsPage extends StatelessWidget {
                             ),
                           ),
                           subtitle: const Text('English (US)'),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                          trailing: const Icon(Icons.chevron_right,
+                              color: Colors.grey),
                         ),
                         ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 0, vertical: 5),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.help_outline, color: Colors.black87, size: 24),
+                            child: const Icon(Icons.help_outline,
+                                color: Colors.black87, size: 24),
                           ),
                           title: const Text(
                             'Help & Support',
@@ -237,17 +264,20 @@ class SettingsPage extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                          trailing: const Icon(Icons.chevron_right,
+                              color: Colors.grey),
                         ),
                         ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 0, vertical: 5),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.info_outline, color: Colors.black87, size: 24),
+                            child: const Icon(Icons.info_outline,
+                                color: Colors.black87, size: 24),
                           ),
                           title: const Text(
                             'About',
@@ -257,7 +287,8 @@ class SettingsPage extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                          trailing: const Icon(Icons.chevron_right,
+                              color: Colors.grey),
                         ),
                       ],
                     ),
