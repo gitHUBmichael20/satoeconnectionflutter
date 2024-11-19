@@ -35,60 +35,61 @@ class _SignUpState extends State<SignUp> {
 
   void _checkFormValidity() {
     setState(() {
-      _isFormValid = _emailController.text.isNotEmpty && 
-                     _passwordController.text.isNotEmpty &&
-                     _usernameController.text.isNotEmpty;
+      _isFormValid = _emailController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty &&
+          _usernameController.text.isNotEmpty;
     });
   }
 
-Future<void> registerUser() async {
-  // Validasi input di sisi frontend
-  final username = _usernameController.text.trim();
-  final email = _emailController.text.trim();
-  final password = _passwordController.text.trim();
+  Future<void> registerUser() async {
+    // Validasi input di sisi frontend
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Masukkan email yang valid.')),
-    );
-    return;
-  }
-
-  // Jika validasi lolos, lanjutkan dengan request ke server
-  const url = 'http://192.168.137.1:8000/api/register';
-
-  try {
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        "name" : username,
-        "email": email,
-        "password": password,
-      }),
-    );
-
-    if (response.statusCode == 201) {
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registrasi berhasil!')),
+        SnackBar(content: Text('Masukkan email yang valid.')),
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const SignIn()),
+      return;
+    }
+
+    // Jika validasi lolos, lanjutkan dengan request ke server
+    const url = 'http://localhost:8000/api/register';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "name": username,
+          "email": email,
+          "password": password,
+        }),
       );
-    } else {
-      final errorData = json.decode(response.body);
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registrasi berhasil!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SignIn()),
+        );
+      } else {
+        final errorData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Registrasi gagal: ${errorData['error'] ?? 'Unknown error'}')),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registrasi gagal: ${errorData['error'] ?? 'Unknown error'}')),
+        SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -232,7 +233,9 @@ Future<void> registerUser() async {
                     // Tambahkan suffix icon untuk toggle password
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                        _isPasswordHidden
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: Color(0xFF1D7874),
                       ),
                       onPressed: () {

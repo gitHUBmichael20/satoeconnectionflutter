@@ -20,10 +20,13 @@ class _SplashscreenState extends State<Splashscreen> {
     super.initState();
     _checkToken();
   }
+
   Future<void> _checkToken() async {
     // Membaca token dari flutter_secure_storage
     final token = await storage.read(key: 'auth_token');
-    
+
+    await Future.delayed(const Duration(seconds: 2));
+
     // Jika token tidak ada, langsung arahkan ke halaman login
     if (token == null) {
       Navigator.pushReplacement(
@@ -50,10 +53,11 @@ class _SplashscreenState extends State<Splashscreen> {
       );
     }
   }
-
+//Mufid,Fadhil,Michael,Kenzie,Handika,Farrel
   // Fungsi untuk memverifikasi token dengan API Laravel
   Future<bool> _verifyToken(String token) async {
-    final url = Uri.parse('http://192.168.137.1:8000/api/user'); // Ganti dengan URL API Anda
+    final url = Uri.parse(
+        'http://localhost:8000/api/user'); // Ganti dengan URL API Anda
 
     // Kirim token melalui header Authorization
     final response = await http.get(
@@ -90,6 +94,7 @@ class _SplashscreenState extends State<Splashscreen> {
                       width: 60,
                       color: const Color(0xFF1D7874), // Teal/green color
                     ),
+                    //Mufid,Fadhil,Michael,Kenzie,Handika,Farrel
                     const SizedBox(height: 12), // Space between logo and text
                     const Text(
                       'Satoe Connection',
@@ -119,3 +124,4 @@ class _SplashscreenState extends State<Splashscreen> {
     );
   }
 }
+//Mufid,Fadhil,Michael,Kenzie,Handika,Farrel
