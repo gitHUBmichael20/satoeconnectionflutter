@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:satoe_connection/screen/wrapper.dart';
 import 'package:satoe_connection/screen/login/sign_up.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -16,6 +16,10 @@ class _SignInState extends State<SignIn> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isFormValid = false;
+  bool _isPasswordHidden = true;
+
+  // Instance flutter_secure_storage
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -33,47 +37,75 @@ class _SignInState extends State<SignIn> {
 
   void _checkFormValidity() {
     setState(() {
-      _isFormValid = _emailController.text.isNotEmpty && 
-                     _passwordController.text.isNotEmpty;
+      _isFormValid = _emailController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty;
     });
   }
 
 Future<void> _login() async {
-  final response = await http.post(
-    Uri.parse('http://localhost:8000/api/login'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'email': _emailController.text,
-      'password': _passwordController.text,
-    }),
-  );
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
 
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    final token = data['token'];
+  // Validasi input di sisi frontend
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Email dan password tidak boleh kosong.')),
+    );
+    return;
+  }
 
-    // Simpan token ke SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
+  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Masukkan email yang valid.')),
+    );
+    return;
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Login successful!')),
+  // Jika validasi berhasil, lanjutkan request ke server
+  try {
+    final response = await http.post(
+      Uri.parse('http://192.168.137.1:8000/api/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+      }),
     );
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const Wrapper()),
-    );
-  } else if (response.statusCode == 401) {
-    final errorData = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final token = data['token'];
+
+      // Simpan token ke flutter_secure_storage
+      await storage.write(key: 'auth_token', value: token);
+
+      // Tampilkan pesan sukses
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login berhasil!')),
+      );
+
+      // Pindah ke halaman berikutnya
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Wrapper()),
+      );
+    } else if (response.statusCode == 401) {
+      final errorData = json.decode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorData['message'] ?? 'Akun tidak ditemukan.')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login gagal. Silakan coba lagi.')),
+      );
+    }
+  } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(errorData['message'])),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login failed. Please try again later.')),
+      const SnackBar(content: Text('Terjadi kesalahan. Mohon periksa lagi!')),
     );
   }
 }
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +171,7 @@ Future<void> _login() async {
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    hintText: 'Enter your email',
+                    hintText: 'example@gmail.com',
                     hintStyle: const TextStyle(
                       color: Colors.black26,
                       fontFamily: 'Poppins',
@@ -171,15 +203,26 @@ Future<void> _login() async {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 8),
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _isPasswordHidden, // Tambahkan variable bool ini
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
                     hintStyle: const TextStyle(
                       color: Colors.black26,
                       fontFamily: 'Poppins',
+                    ),
+                    // Tambahkan suffix icon untuk toggle password
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                        color: Color(0xFF1D7874),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordHidden = !_isPasswordHidden;
+                        });
+                      },
                     ),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(
