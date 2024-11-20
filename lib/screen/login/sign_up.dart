@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:satoe_connection/screen/wrapper.dart';
 import 'package:satoe_connection/screen/login/sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -12,19 +11,23 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isFormValid = false;
+  bool _isPasswordHidden = true;
 
   @override
   void initState() {
     super.initState();
+    _usernameController.addListener(_checkFormValidity);
     _emailController.addListener(_checkFormValidity);
     _passwordController.addListener(_checkFormValidity);
   }
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -32,27 +35,42 @@ class _SignUpState extends State<SignUp> {
 
   void _checkFormValidity() {
     setState(() {
-      _isFormValid = _emailController.text.isNotEmpty && 
-                     _passwordController.text.isNotEmpty;
+      _isFormValid = _emailController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty &&
+          _usernameController.text.isNotEmpty;
     });
   }
 
   Future<void> registerUser() async {
-    const url = 'http://localhost:8000/api/register'; // Ganti dengan URL API-mu
+    // Validasi input di sisi frontend
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Masukkan email yang valid.')),
+      );
+      return;
+    }
+
+    // Jika validasi lolos, lanjutkan dengan request ke server
+    const url = 'http://localhost:8000/api/register';
 
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
-          "email": _emailController.text,
-          "password": _passwordController.text,
+          "name": username,
+          "email": email,
+          "password": password,
         }),
       );
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful!')),
+          const SnackBar(content: Text('Registrasi berhasil!')),
         );
         Navigator.pushReplacement(
           context,
@@ -61,12 +79,14 @@ class _SignUpState extends State<SignUp> {
       } else {
         final errorData = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${errorData['error'] ?? 'Unknown error'}')),
+          SnackBar(
+              content: Text(
+                  'Registrasi gagal: ${errorData['error'] ?? 'Unknown error'}')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Username sudah digunakan!')),
+        SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
       );
     }
   }
@@ -123,7 +143,7 @@ class _SignUpState extends State<SignUp> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Your email',
+                  'Username',
                   style: TextStyle(
                     fontSize: 14,
                     fontFamily: 'Poppins',
@@ -131,11 +151,10 @@ class _SignUpState extends State<SignUp> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 8),
                 TextField(
-                  controller: _emailController,
+                  controller: _usernameController,
                   decoration: InputDecoration(
-                    hintText: 'Enter your eamail',
+                    hintText: 'Enter your username',
                     hintStyle: const TextStyle(
                       color: Colors.black26,
                       fontFamily: 'Poppins',
@@ -154,7 +173,42 @@ class _SignUpState extends State<SignUp> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Your email',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
+                    color: Color(0xFF1D7874),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    hintText: 'example@gmail.com',
+                    hintStyle: const TextStyle(
+                      color: Colors.black26,
+                      fontFamily: 'Poppins',
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade200,
+                      ),
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF1D7874),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -167,15 +221,28 @@ class _SignUpState extends State<SignUp> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 8),
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _isPasswordHidden, // Tambahkan variable bool ini
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
                     hintStyle: const TextStyle(
                       color: Colors.black26,
                       fontFamily: 'Poppins',
+                    ),
+                    // Tambahkan suffix icon untuk toggle password
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordHidden
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Color(0xFF1D7874),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordHidden = !_isPasswordHidden;
+                        });
+                      },
                     ),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(

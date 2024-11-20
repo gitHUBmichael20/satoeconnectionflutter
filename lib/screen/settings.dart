@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:satoe_connection/screen/splashscreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,6 +24,52 @@ class MyApp extends StatelessWidget {
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
+
+  // Initialize FlutterSecureStorage
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      // Dapatkan token yang tersimpan
+      final token = await _storage.read(key: 'auth_token');
+
+      if (token == null) {
+        throw Exception('No authentication token found');
+      }
+
+      // Buat instance http client
+      final response = await http.post(
+        Uri.parse(
+            'http://localhost:8000/api/logout'), // Sesuaikan dengan base URL API Anda
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Hapus token dari storage setelah berhasil logout dari server
+        await _storage.delete(key: 'auth_token');
+
+        // Tampilkan snackbar sukses
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You have signed out successfully.')),
+        );
+
+        // Navigasi ke halaman splash screen
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const Splashscreen(),
+        ));
+      } else {
+        // Handle error response dari server
+        throw Exception('Failed to logout. Please try again.');
+      }
+    } catch (e) {
+      // Tampilkan error message ke user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -295,12 +344,11 @@ class SettingsPage extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 40),
-
-                  // Sign Out Button
+// Sign Out Button
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () => _signOut(context),
                       child: const Text(
                         'Sign Out',
                         style: TextStyle(
