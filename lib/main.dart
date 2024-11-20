@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:satoe_connection/screen/homescreen.dart';
 import 'package:satoe_connection/screen/splashscreen.dart';
-import 'package:satoe_connection/screen/chat.dart';
+import 'package:satoe_connection/screen/wrapper.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Splashscreen(); // Display Splashscreen while waiting
           } else {
+            // return const HomeScreen();
             return const HomeScreen();
           }
         },

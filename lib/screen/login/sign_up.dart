@@ -70,7 +70,7 @@ class _SignUpState extends State<SignUp> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registrasi berhasil!')),
+          const SnackBar(content: Text('Registrasi berhasil!')),
         );
         Navigator.pushReplacement(
           context,

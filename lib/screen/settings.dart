@@ -222,19 +222,31 @@ class SettingsPage extends StatelessWidget {
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.lock_outline,
+                            child: const Icon(Icons.dark_mode_outlined,
                                 color: Colors.black87, size: 24),
                           ),
                           title: const Text(
-                            'Privacy',
+                            'Dark Mode',
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          trailing: const Icon(Icons.chevron_right,
-                              color: Colors.grey),
+                          trailing: Switch.adaptive(
+                            value: false, // Nilai default false (light mode)
+                            activeColor:
+                                Colors.blue, // Warna ketika switch aktif
+                            activeTrackColor: Colors.blue
+                                .withOpacity(0.5), // Warna track ketika aktif
+                            inactiveThumbColor:
+                                Colors.grey[400], // Warna thumb ketika nonaktif
+                            inactiveTrackColor:
+                                Colors.grey[300], // Warna track ketika nonaktif
+                            onChanged: (bool value) {
+                              // Function akan diimplementasikan nanti
+                            },
+                          ),
                         ),
                       ],
                     ),
