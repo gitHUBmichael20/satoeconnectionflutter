@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:satoe_connection/screen/chat/chatService.dart';
 import 'package:satoe_connection/screen/chat.dart';
-import 'package:satoe_connection/screen/kontak.dart'; // Import your contact screen
+import 'package:satoe_connection/screen/kontak.dart';
+import 'package:satoe_connection/screen/chat/chatService.dart';
+
 
 class Beranda extends StatefulWidget {
   const Beranda({super.key});
+
+  final ChatServices _chatServices = ChatServices();
 
   @override
   State<Beranda> createState() => _BerandaState();
@@ -25,9 +28,9 @@ class _BerandaState extends State<Beranda> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: buildContext(),
+      body: _buildUserList(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -35,8 +38,8 @@ class _BerandaState extends State<Beranda> {
             ),
           );
         },
-        child: const Icon(Icons.contact_phone), // Icon for the button
-        backgroundColor: Colors.green[400], // Customize the button color
+        child: const Icon(Icons.contact_phone),
+        backgroundColor: Colors.green[400],
       ),
     );
   }
@@ -71,23 +74,10 @@ class _BerandaState extends State<Beranda> {
             });
           },
         ),
-        actions: [
-          if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear, color: Colors.black87),
-              onPressed: () {
-                setState(() {
-                  _searchController.clear();
-                  _searchQuery = '';
-                });
-              },
-            ),
-        ],
       );
     }
 
     return AppBar(
-      automaticallyImplyLeading: false,
       backgroundColor: Colors.white,
       elevation: 0,
       title: Padding(
@@ -117,97 +107,14 @@ class _BerandaState extends State<Beranda> {
     );
   }
 
-  Widget buildContext() {
-    return StreamBuilder<List<Map>>(
-      stream: ChatServices().getChats(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        } else {
-          final chats = snapshot.data!;
-          final filteredChats = chats.where((chat) {
-            final name = chat['name'].toString().toLowerCase();
-            return name.contains(_searchQuery.toLowerCase());
-          }).toList();
 
-          if (filteredChats.isEmpty && _searchQuery.isNotEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.search_off,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No results found',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+Widget _buildUserList() {
+  return StreamBuilder(
+    stream: _chatServices.getUserStream(),
+    builder: (context, snapshot) {
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: filteredChats.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final chat = filteredChats[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.grey[300],
-                  child: Text(
-                    chat['name'][0],
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      chat['name'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      chat['time'],
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                onTap: () {
-                  final selectedChat = Map<String, dynamic>.from(chat);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Chat(chatData: selectedChat),
-                    ),
-                  );
-                },
-              );
-            },
-          );
-        }
-      },
-    );
-  }
+    },
+  );
+}
+
 }

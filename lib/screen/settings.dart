@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -22,24 +23,56 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
-  // Initialize FlutterSecureStorage
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  Future<void> _signOut(BuildContext context) async {
+  String? name = '';
+  String? email = '';
+  String? id = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  /// Fungsi untuk memuat data pengguna dari storage
+  Future<void> _loadUserData() async {
+    // Periksa apakah data pengguna sudah ada di storage
+    final storedName = await _storage.read(key: 'user_name');
+    final storedEmail = await _storage.read(key: 'user_email');
+    final storedId = await _storage.read(key: 'user_id');
+
+    if (storedName != null && storedEmail != null && storedId != null) {
+      // Jika data pengguna ditemukan di storage, gunakan data tersebut
+      setState(() {
+        name = storedName;
+        email = storedEmail;
+        id = storedId;
+      });
+    } else {
+      // Jika data tidak ditemukan, ambil dari API dan simpan ke storage
+      await _getUserData();
+    }
+  }
+
+  Future<void> _getUserData() async {
     try {
-      // Dapatkan token yang tersimpan
+      // Ambil token dari storage
       final token = await _storage.read(key: 'auth_token');
 
       if (token == null) {
         throw Exception('No authentication token found');
       }
 
-      // Buat instance http client
-      final response = await http.post(
-        Uri.parse(
-            'http://localhost:8000/api/logout'), // Sesuaikan dengan base URL API Anda
+      final response = await http.get(
+        Uri.parse('http://localhost:8000/api/user'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -47,12 +80,103 @@ class SettingsPage extends StatelessWidget {
       );
 
       if (response.statusCode == 200) {
-        // Hapus token dari storage setelah berhasil logout dari server
-        await _storage.delete(key: 'auth_token');
+        final data = json.decode(response.body);
 
-        // Tampilkan snackbar sukses
+        // Simpan data ke storage
+        await _storage.write(key: 'user_name', value: data['name']);
+        await _storage.write(key: 'user_email', value: data['email']);
+        await _storage.write(key: 'user_id', value: data['id'].toString());
+
+        setState(() {
+          name = data['name'];
+          email = data['email'];
+          id = data['id'].toString();
+        });
+      } else {
+        throw Exception('Failed to fetch user data');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Error: ${e.toString()}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFE57373),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 3),
+          elevation: 4,
+        ),
+      );
+    }
+  }
+
+  // Fungsi untuk logout dan menghapus data pengguna dari storage
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+
+      if (token == null) {
+        throw Exception('No authentication token found');
+      }
+
+      final response = await http.post(
+        Uri.parse('http://localhost:8000/api/logout'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Hapus data pengguna, tapi token tetap disimpan
+        await _storage.delete(key: 'user_name');
+        await _storage.delete(key: 'user_email');
+        await _storage.delete(key: 'user_id');
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You have signed out successfully.')),
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Kamu telah sukses Logout.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF4CAF50),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.all(10),
+            duration: const Duration(seconds: 3),
+            elevation: 4,
+          ),
         );
 
         // Navigasi ke halaman splash screen
@@ -60,13 +184,36 @@ class SettingsPage extends StatelessWidget {
           builder: (context) => const Splashscreen(),
         ));
       } else {
-        // Handle error response dari server
-        throw Exception('Failed to logout. Please try again.');
+        throw Exception('Failed to logout');
       }
     } catch (e) {
-      // Tampilkan error message ke user
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Error: ${e.toString()}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFE57373),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 3),
+          elevation: 4,
+        ),
       );
     }
   }
@@ -129,15 +276,26 @@ class SettingsPage extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'John Doe',
-                              style: TextStyle(
+                            Text(
+                              name ??
+                                  'Loading...', // Menampilkan nama jika tersedia
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              'johndoe@email.com',
+                              email ??
+                                  'Loading...', // Menampilkan email jika tersedia
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              id != null
+                                  ? 'ID: $id'
+                                  : 'Loading...', // Menampilkan ID jika tersedia
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14,

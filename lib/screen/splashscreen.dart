@@ -53,6 +53,7 @@ class _SplashscreenState extends State<Splashscreen> {
       );
     }
   }
+
 //Mufid,Fadhil,Michael,Kenzie,Handika,Farrel
   // Fungsi untuk memverifikasi token dengan API Laravel
   Future<bool> _verifyToken(String token) async {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:satoe_connection/screen/chat.dart';
 import 'package:http/http.dart' as http;
 
 class KontakPonsel extends StatefulWidget {
@@ -28,7 +29,8 @@ class _KontakPonselState extends State<KontakPonsel> {
     if (kontakString != null) {
       List<dynamic> kontakListJson = jsonDecode(kontakString);
       setState(() {
-        _kontakList = List<Map<String, String>>.from(kontakListJson.map((item) => Map<String, String>.from(item)));
+        _kontakList = List<Map<String, String>>.from(
+            kontakListJson.map((item) => Map<String, String>.from(item)));
       });
     }
   }
@@ -46,7 +48,32 @@ class _KontakPonselState extends State<KontakPonsel> {
     // Validasi input
     if (id.isEmpty || nama.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID dan Nama harus diisi')),
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'ID dan Nama panggil harus diisi.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFE57373),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 3),
+          elevation: 4,
+        ),
       );
       return;
     }
@@ -55,7 +82,32 @@ class _KontakPonselState extends State<KontakPonsel> {
     bool isDuplicate = _kontakList.any((kontak) => kontak['id'] == id);
     if (isDuplicate) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID sudah ada di daftar kontak')),
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'ID sudah ada di daftar kontak.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFE57373),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 3),
+          elevation: 4,
+        ),
       );
       return;
     }
@@ -64,6 +116,7 @@ class _KontakPonselState extends State<KontakPonsel> {
     final response = await http.get(
       Uri.parse('http://localhost:8000/api/verify/$id'),
       headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -83,11 +136,61 @@ class _KontakPonselState extends State<KontakPonsel> {
 
       _saveKontak();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kontak berhasil ditambahkan')),
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Kontak berhasil di tambahkan.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF4CAF50),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 3),
+          elevation: 4,
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID atau User tidak ditemukan')),
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'ID atau User tidak ditemukan.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFE57373),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 3),
+          elevation: 4,
+        ),
       );
     }
   }
@@ -178,7 +281,8 @@ class _KontakPonselState extends State<KontakPonsel> {
                       contentPadding: const EdgeInsets.all(16),
                       title: Text(
                         kontak['nama']!,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,6 +294,29 @@ class _KontakPonselState extends State<KontakPonsel> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                            icon: const Icon(Icons.chat),
+                            onPressed: () {
+                              // Mengambil data kontak yang dipilih
+                              final receiverId = kontak['id']; // ID penerima
+
+                              // Navigasi ke halaman chat dengan data kontak
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Chat(
+                                    chatData: {
+                                      'id': kontak['id'],
+                                      'name': kontak['nama'],
+                                      'username': kontak['username'],
+                                      'receiver_id':
+                                          receiverId, // Mengirimkan receiver_id ke halaman Chat
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                           IconButton(
                             icon: const Icon(Icons.edit),
                             onPressed: () => _renameNama(index),
@@ -209,7 +336,7 @@ class _KontakPonselState extends State<KontakPonsel> {
                   );
                 },
               ),
-            ),
+            )
           ],
         ),
       ),

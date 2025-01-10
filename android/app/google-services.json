@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1079140598410",
+    "firebase_url": "https://satoeconnections-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "satoeconnections",
+    "storage_bucket": "satoeconnections.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1079140598410:android:a49d147ffb9d7caf05e373",
+        "android_client_info": {
+          "package_name": "com.example.satoe_connection"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKzqBm_-ntaX1yW85AR7vsmQv-FZtOvho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

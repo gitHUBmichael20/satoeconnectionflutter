@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Chat extends StatefulWidget {
   final Map<String, dynamic> chatData;
-  
+
   const Chat({super.key, required this.chatData});
 
   @override
@@ -14,94 +16,14 @@ class _ChatState extends State<Chat> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<Map<String, dynamic>> _messages = [];
-  bool _isTyping = false;
-
+  
   @override
   void initState() {
     super.initState();
-    _messages.addAll([
-      {
-        'sender': widget.chatData['name'],
-        'message': 'Hi there!',
-        'time': DateTime.now().subtract(const Duration(minutes: 5)),
-        'isSender': false,
-      },
-      {
-        'sender': 'Me',
-        'message': 'Hello!',
-        'time': DateTime.now().subtract(const Duration(minutes: 4)),
-        'isSender': true,
-      },
-      {
-        'sender': widget.chatData['name'],
-        'message': 'How are you?',
-        'time': DateTime.now().subtract(const Duration(minutes: 3)),
-        'isSender': false,
-      },
-    ]);
+    _loadMessages(); // Memuat pesan yang sudah disimpan
   }
 
-  void _scrollToBottom() {
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-  }
-
-  void _handleMenuSelection(String value) {
-    switch (value) {
-      case 'search':
-        // Implement search functionality
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Search'),
-            content: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search messages...',
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (value) {
-                // Implement search logic
-              },
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-            ],
-          ),
-        );
-        break;
-      case 'clear':
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Clear Chat'),
-            content: const Text('Are you sure you want to clear all messages?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _messages.clear();
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Text('Clear'),
-              ),
-            ],
-          ),
-        );
-        break;
-    }
-  }
-
+  // Fungsi untuk memformat waktu pesan
   String _formatTime(DateTime time) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -114,6 +36,83 @@ class _ChatState extends State<Chat> {
     } else {
       return DateFormat('MMM d, HH:mm').format(time);
     }
+  }
+
+  // Fungsi untuk mengirim pesan
+// Fungsi untuk mengirim pesan
+Future<void> _sendMessage(String message) async {
+  final receiverId = widget.chatData['id'];
+  final currentTime = DateTime.now();
+
+  // Menyimpan pesan ke SharedPreferences
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String> messages = prefs.getStringList('messages') ?? [];
+
+  // Menyimpan pesan yang dikirim dan menerima pesan dari bot
+  messages.add(jsonEncode({
+    'message': message,
+    'sender': 'You',
+    'isSender': true,
+    'time': currentTime.toIso8601String(), // Pastikan disimpan dalam string format
+  }));
+
+  // Simulasi bot yang membalas
+  messages.add(jsonEncode({
+    'message': 'Bot response to "$message"',
+    'sender': 'Bot',
+    'isSender': false,
+    'time': currentTime.add(const Duration(seconds: 1)).toIso8601String(),
+  }));
+
+  // Menyimpan daftar pesan kembali ke SharedPreferences
+  await prefs.setStringList('messages', messages);
+
+  setState(() {
+    _messages.add({
+      'message': message,
+      'sender': 'You',
+      'isSender': true,
+      'time': currentTime,
+    });
+
+    _messages.add({
+      'message': 'Bot response to "$message"',
+      'sender': 'Bot',
+      'isSender': false,
+      'time': currentTime.add(const Duration(seconds: 1)),
+    });
+  });
+
+  _messageController.clear();
+  _scrollToBottom();
+}
+
+// Fungsi untuk memuat pesan yang disimpan di SharedPreferences
+Future<void> _loadMessages() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String> messages = prefs.getStringList('messages') ?? [];
+
+  setState(() {
+    _messages.clear();
+    for (var message in messages) {
+      var msg = jsonDecode(message);
+
+      // Pastikan untuk mengubah waktu kembali ke DateTime setelah diambil dari SharedPreferences
+      msg['time'] = DateTime.parse(msg['time']); // Parse string ke DateTime
+      _messages.add(msg);
+    }
+  });
+}
+
+  // Fungsi untuk meng-scroll ke bawah
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   @override
@@ -130,11 +129,8 @@ class _ChatState extends State<Chat> {
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16),
-                itemCount: _messages.length + (_isTyping ? 1 : 0),
+                itemCount: _messages.length,
                 itemBuilder: (context, index) {
-                  if (index == _messages.length && _isTyping) {
-                    return _buildTypingIndicator();
-                  }
                   return _buildMessageBubble(_messages[index]);
                 },
               ),
@@ -146,9 +142,10 @@ class _ChatState extends State<Chat> {
     );
   }
 
+  // Membuat AppBar
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 244, 237, 237),
       elevation: 1,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: Colors.green[800]),
@@ -184,7 +181,7 @@ class _ChatState extends State<Chat> {
                   ),
                 ),
                 Text(
-                  _isTyping ? 'typing...' : 'online',
+                  'online',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -195,29 +192,14 @@ class _ChatState extends State<Chat> {
           ),
         ],
       ),
-      actions: [
-        PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert, color: Colors.green[800]),
-          onSelected: _handleMenuSelection,
-          itemBuilder: (BuildContext context) => [
-            const PopupMenuItem(
-              value: 'search',
-              child: Text('Search'),
-            ),
-            const PopupMenuItem(
-              value: 'clear',
-              child: Text('Clear chat'),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
+  // Membuat bubble pesan
   Widget _buildMessageBubble(Map<String, dynamic> message) {
     final isSender = message['isSender'];
     final time = message['time'] as DateTime;
-    
+
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -283,60 +265,10 @@ class _ChatState extends State<Chat> {
     );
   }
 
-  Widget _buildTypingIndicator() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(top: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildDot(0),
-            _buildDot(1),
-            _buildDot(2),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDot(int index) {
-    return TweenAnimationBuilder(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 600),
-      curve: Curves.easeInOut,
-      builder: (context, value, child) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 2),
-          height: 8,
-          width: 8,
-          decoration: BoxDecoration(
-            color: Colors.grey[400],
-            shape: BoxShape.circle,
-          ),
-        );
-      },
-    );
-  }
-
+  // Membuat input pesan
   Widget _buildMessageInput() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
           Expanded(
@@ -345,47 +277,32 @@ class _ChatState extends State<Chat> {
               maxLines: null,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
-                hintText: 'Message',
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintText: 'Type a message...',
+                hintStyle: TextStyle(color: const Color.fromARGB(255, 97, 91, 91)),
+                filled: true,
+                fillColor: const Color.fromARGB(175, 190, 185, 185),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
                 ),
-                filled: true,
-                fillColor: Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
-              onChanged: (value) {
-                setState(() {
-                  _isTyping = value.isNotEmpty;
-                });
+              onSubmitted: (message) {
+                if (message.isNotEmpty) {
+                  _sendMessage(message);
+                }
               },
             ),
           ),
           const SizedBox(width: 8),
-          CircleAvatar(
-            backgroundColor: Colors.green[800],
-            child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: () {
-                if (_messageController.text.isNotEmpty) {
-                  setState(() {
-                    _messages.add({
-                      'sender': 'Me',
-                      'message': _messageController.text,
-                      'time': DateTime.now(),
-                      'isSender': true,
-                    });
-                    _messageController.clear();
-                    _isTyping = false;
-                  });
-                  _scrollToBottom();
-                }
-              },
-            ),
+          IconButton(
+            icon: Icon(Icons.send, color: Colors.green[800]),
+            onPressed: () {
+              final message = _messageController.text.trim();
+              if (message.isNotEmpty) {
+                _sendMessage(message);
+              }
+            },
           ),
         ],
       ),
